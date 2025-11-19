@@ -77,8 +77,8 @@ export default function Footer() {
           </div>
           
           {/* Created by section */}
-          <div className="flex items-center justify-center gap-1.5 mt-6">
-            <p className="text-sm text-gray-400">
+          <div className="flex items-end justify-center gap-1.5 mt-6">
+            <p className="text-sm text-gray-400" style={{ marginBottom: '6px' }}>
               Created with love by <span className="text-white font-semibold">MelodyWebPages</span>
             </p>
             <style>{`
@@ -98,9 +98,7 @@ export default function Footer() {
               style={{
                 color: '#f97316',
                 fontWeight: 900,
-                lineHeight: 1,
-                marginBottom: '-8px',
-                alignSelf: 'flex-end'
+                lineHeight: 1
               }}
               aria-label="G Clef"
             >
