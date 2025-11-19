@@ -10,6 +10,8 @@ interface DownloadHistoryItem {
   filename: string;
   format: string;
   timestamp: number;
+  eplContent?: string;
+  previewImage?: string;
 }
 
 export default function Home() {
@@ -68,10 +70,51 @@ export default function Home() {
       filename,
       format,
       timestamp: Date.now(),
+      eplContent: editedContent || eplContent || undefined,
+      previewImage: previewImage || undefined,
     };
     const updated = [newItem, ...downloadHistory].slice(0, 10); // Keep last 10
     setDownloadHistory(updated);
-    localStorage.setItem('downloadHistory', JSON.stringify(updated));
+    try {
+      localStorage.setItem('downloadHistory', JSON.stringify(updated));
+    } catch (e) {
+      // If localStorage is full, try with fewer items
+      console.warn('localStorage full, storing fewer items');
+      const reduced = [newItem, ...downloadHistory].slice(0, 5);
+      localStorage.setItem('downloadHistory', JSON.stringify(reduced));
+      setDownloadHistory(reduced);
+    }
+  };
+
+  // Restore from history
+  const restoreFromHistory = (item: DownloadHistoryItem) => {
+    if (item.eplContent) {
+      setEplContent(item.eplContent);
+      setEditedContent(item.eplContent);
+      setIsEdited(false);
+      
+      // Detect number of labels
+      const pCommands = item.eplContent.match(/^P\d*/gim);
+      const detectedLabelCount = pCommands ? pCommands.length : 1;
+      setLabelCount(detectedLabelCount);
+      
+      // Restore preview if available
+      if (item.previewImage) {
+        setPreviewImage(item.previewImage);
+      }
+      
+      // Create a pseudo-file for compatibility
+      const blob = new Blob([item.eplContent], { type: 'text/plain' });
+      const restoredFile = new File([blob], item.filename.replace(/\.(pdf|zpl|png)$/, '.epl'), { type: 'text/plain' });
+      setFile(restoredFile);
+      
+      showToast(`Restored: ${item.filename}`, 'success');
+      
+      // Scroll to top to see the editor
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      showToast('This item cannot be restored (no content saved)', 'warning');
+    }
   };
 
   // Clear download history
@@ -1052,8 +1095,8 @@ export default function Home() {
               <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} rounded-xl border p-4`}>
                 <div className="space-y-2">
                   {downloadHistory.map((item) => (
-                    <div key={item.id} className={`flex items-center justify-between p-3 ${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg`}>
-                      <div className="flex items-center gap-3">
+                    <div key={item.id} className={`flex items-center justify-between p-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-50 hover:bg-gray-100'} rounded-lg transition-colors cursor-pointer group`}>
+                      <div className="flex items-center gap-3 flex-1" onClick={() => restoreFromHistory(item)}>
                         <div className={`p-2 ${darkMode ? 'bg-gray-600' : 'bg-blue-100'} rounded`}>
                           <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -1066,9 +1109,20 @@ export default function Home() {
                           </p>
                         </div>
                       </div>
-                      <span className={`text-xs ${darkMode ? 'bg-gray-600 text-gray-300' : 'bg-green-100 text-green-800'} px-2 py-1 rounded`}>
-                        Downloaded
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {item.eplContent && (
+                          <button
+                            onClick={() => restoreFromHistory(item)}
+                            className={`text-xs ${darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-100 hover:bg-blue-200 text-blue-800'} px-3 py-1 rounded transition-colors opacity-0 group-hover:opacity-100`}
+                            title="Reopen this file"
+                          >
+                            🔄 Reopen
+                          </button>
+                        )}
+                        <span className={`text-xs ${darkMode ? 'bg-gray-600 text-gray-300' : 'bg-green-100 text-green-800'} px-2 py-1 rounded`}>
+                          Downloaded
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
