@@ -1,0 +1,10 @@
+# Google AdSense
+# Format: google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+# Replace pub-0000000000000000 with your actual Publisher ID
+
+# Add your Google AdSense publisher ID here when you have one
+# google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
+
+# This file helps prevent unauthorized inventory sales
+# Update this file with your actual ads.txt entries when setting up Google Ads
+
