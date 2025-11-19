@@ -81,28 +81,29 @@ export default function Footer() {
             <p className="text-sm text-gray-400">
               Created with love by <span className="text-white font-semibold">MelodyWebPages</span>
             </p>
-            <svg 
-              className="w-7 h-7" 
-              viewBox="0 0 24 24" 
-              fill="#f97316"
-              aria-label="Music Note"
+            <style>{`
+              @keyframes rotate3d {
+                0% { transform: perspective(500px) rotateY(0deg); }
+                100% { transform: perspective(500px) rotateY(360deg); }
+              }
+              .gclef-3d {
+                animation: rotate3d 4s linear infinite;
+                transform-style: preserve-3d;
+                filter: drop-shadow(0 3px 6px rgba(249, 115, 22, 0.6));
+                display: inline-block;
+              }
+            `}</style>
+            <span 
+              className="gclef-3d text-4xl font-bold"
               style={{
-                animation: 'rotate3d 4s linear infinite',
-                transformStyle: 'preserve-3d',
-                filter: 'drop-shadow(0 2px 4px rgba(249, 115, 22, 0.4))'
+                color: '#f97316',
+                fontWeight: 900,
+                lineHeight: 1
               }}
+              aria-label="G Clef"
             >
-              <defs>
-                <style>{`
-                  @keyframes rotate3d {
-                    0% { transform: perspective(400px) rotateY(0deg); }
-                    100% { transform: perspective(400px) rotateY(360deg); }
-                  }
-                `}</style>
-              </defs>
-              <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
-              <ellipse cx="10" cy="17" rx="2.5" ry="1.5" opacity="0.5"/>
-            </svg>
+              𝄞
+            </span>
           </div>
           
           <p className="text-xs text-gray-500 text-center mt-4">
