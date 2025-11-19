@@ -33,6 +33,9 @@ export default function Home() {
   const [fullScreen, setFullScreen] = useState(false);
   const [downloadHistory, setDownloadHistory] = useState<DownloadHistoryItem[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -77,6 +80,36 @@ export default function Home() {
     localStorage.removeItem('downloadHistory');
     showToast('Download history cleared', 'success');
   };
+
+  // Drag handlers for panning zoomed preview
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoom > 100) {
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && zoom > 100) {
+      setPanOffset({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y,
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  // Reset pan when zoom changes
+  useEffect(() => {
+    setPanOffset({ x: 0, y: 0 });
+  }, [zoom]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -914,14 +947,23 @@ export default function Home() {
                       <p className="text-gray-500 text-xs mt-1">This may take a few seconds</p>
                     </div>
                   ) : previewImage ? (
-                    <div className="w-full overflow-auto max-h-[450px]">
+                    <div 
+                      className="w-full overflow-hidden max-h-[450px] relative"
+                      style={{ cursor: zoom > 100 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
+                      onMouseDown={handleMouseDown}
+                      onMouseMove={handleMouseMove}
+                      onMouseUp={handleMouseUp}
+                      onMouseLeave={handleMouseLeave}
+                    >
                       <img
                         src={previewImage}
                         alt="Label Preview"
-                        className="max-w-full h-auto mx-auto border-2 border-gray-400 shadow-lg rounded bg-white transition-all duration-300"
+                        className="max-w-full h-auto mx-auto border-2 border-gray-400 shadow-lg rounded bg-white transition-transform duration-300 select-none"
+                        draggable={false}
                         style={{ 
-                          transform: `rotate(${rotation}deg) scale(${zoom / 100})`,
-                          transformOrigin: 'center'
+                          transform: `translate(${panOffset.x}px, ${panOffset.y}px) rotate(${rotation}deg) scale(${zoom / 100})`,
+                          transformOrigin: 'center',
+                          pointerEvents: zoom > 100 ? 'none' : 'auto'
                         }}
                       />
                     </div>
@@ -1098,14 +1140,24 @@ export default function Home() {
               🔄 Rotate
             </button>
           </div>
-          <div className="max-w-full max-h-full overflow-auto" onClick={(e) => e.stopPropagation()}>
+          <div 
+            className="max-w-full max-h-full overflow-hidden flex items-center justify-center" 
+            style={{ cursor: zoom > 100 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+          >
             <img
               src={previewImage}
               alt="Label Preview Fullscreen"
-              className="max-w-full h-auto"
+              className="max-w-full h-auto select-none"
+              draggable={false}
               style={{ 
-                transform: `rotate(${rotation}deg) scale(${zoom / 100})`,
-                transformOrigin: 'center'
+                transform: `translate(${panOffset.x}px, ${panOffset.y}px) rotate(${rotation}deg) scale(${zoom / 100})`,
+                transformOrigin: 'center',
+                pointerEvents: zoom > 100 ? 'none' : 'auto'
               }}
             />
           </div>
