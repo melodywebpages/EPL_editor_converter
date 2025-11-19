@@ -77,8 +77,8 @@ export default function Footer() {
           </div>
           
           {/* Created by section */}
-          <div className="flex items-end justify-center gap-1.5 mt-6">
-            <p className="text-sm text-gray-400" style={{ marginBottom: '12px' }}>
+          <div className="flex items-center justify-center gap-1.5 mt-6">
+            <p className="text-sm text-gray-400">
               Created with love by <span className="text-white font-semibold">MelodyWebPages</span>
             </p>
             <style>{`
