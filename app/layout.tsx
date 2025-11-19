@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 import Footer from '@/components/Footer'
 import CookieConsent from '@/components/CookieConsent'
+import GoogleAnalytics from '@/components/GoogleAnalytics'
+import GoogleAdsense from '@/components/GoogleAdsense'
 
 export const metadata: Metadata = {
   title: 'EPL Editor & Converter - Edit, Preview & Convert EPL to ZPL/PDF',
@@ -35,6 +37,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <GoogleAnalytics />
+        <GoogleAdsense />
+      </head>
       <body>
         {children}
         <Footer />

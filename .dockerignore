@@ -1,0 +1,50 @@
+# Dependencies
+node_modules
+npm-debug.log
+
+# Testing
+test/
+*.test.js
+*.test.ts
+*.test.tsx
+coverage
+
+# Development
+.git
+.gitignore
+.vscode
+.idea
+*.md
+!README.md
+
+# Next.js
+.next
+out
+
+# Environment files
+.env
+.env*.local
+.env.development
+.env.test
+
+# Build files
+dist
+build
+
+# Documentation
+docs/
+GIT_SETUP_GUIDE.md
+QUICK_GIT_COMMANDS.md
+DEPLOYMENT_CHECKLIST.md
+GOOGLE_ADS_COMPLIANCE.md
+CHANGELOG.md
+
+# Test files
+epltest.epl.txt
+test-*.js
+*.test.js
+
+# Misc
+.DS_Store
+*.log
+

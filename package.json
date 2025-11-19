@@ -5,8 +5,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "next start -p 8080",
+    "lint": "next lint",
+    "docker:build": "docker build -t epl-editor-converter .",
+    "docker:run": "docker run -p 8080:8080 epl-editor-converter",
+    "deploy": "gcloud run deploy epl-editor-converter --source .",
+    "logs": "gcloud run logs read epl-editor-converter --limit=50"
   },
   "dependencies": {
     "axios": "^1.6.0",
