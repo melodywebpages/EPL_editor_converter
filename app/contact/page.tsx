@@ -13,41 +13,21 @@ export default function Contact() {
             </p>
           </section>
 
-          <section className="grid md:grid-cols-2 gap-6">
-            <div className="bg-blue-50 p-6 rounded-lg border border-blue-100">
+          <section className="flex justify-center">
+            <div className="bg-blue-50 p-6 rounded-lg border border-blue-100 max-w-md w-full">
               <div className="text-blue-600 mb-3">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Email</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Email Support</h3>
               <p className="text-gray-700">
-                <strong>General Inquiries:</strong><br />
-                info@eplconverter.com
+                For all inquiries, support requests, bug reports, and feature suggestions:
               </p>
-              <p className="text-gray-700 mt-3">
-                <strong>Support:</strong><br />
-                support@eplconverter.com
-              </p>
-              <p className="text-gray-700 mt-3">
-                <strong>Legal/Privacy:</strong><br />
-                legal@eplconverter.com
-              </p>
-            </div>
-
-            <div className="bg-purple-50 p-6 rounded-lg border border-purple-100">
-              <div className="text-purple-600 mb-3">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Address</h3>
-              <p className="text-gray-700">
-                [Your Company Name]<br />
-                [Street Address]<br />
-                [City, State ZIP]<br />
-                [Country]
+              <p className="text-gray-700 mt-4">
+                <a href="mailto:melodywebpages@gmail.com" className="text-blue-600 hover:text-blue-800 font-semibold text-lg">
+                  melodywebpages@gmail.com
+                </a>
               </p>
             </div>
           </section>
@@ -82,7 +62,7 @@ export default function Contact() {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="font-semibold text-gray-900 mb-2">What if my conversion doesn't work correctly?</h3>
                 <p className="text-gray-700">
-                  Please contact us at support@eplconverter.com with details about the issue and a sample 
+                  Please contact us at melodywebpages@gmail.com with details about the issue and a sample 
                   of your EPL file (if possible). We'll investigate and help resolve the problem.
                 </p>
               </div>
@@ -99,27 +79,20 @@ export default function Contact() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Business Hours</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Response Time</h2>
             <p className="text-gray-700 leading-relaxed">
               We typically respond to emails within 24-48 hours during business days.
-            </p>
-            <p className="text-gray-700 mt-2">
-              <strong>Monday - Friday:</strong> 9:00 AM - 6:00 PM (EST)<br />
-              <strong>Saturday - Sunday:</strong> Closed
             </p>
           </section>
 
           <section className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg border border-blue-100">
             <h2 className="text-2xl font-semibold text-gray-900 mb-3">Report a Bug or Suggest a Feature</h2>
             <p className="text-gray-700 leading-relaxed mb-4">
-              Help us improve! If you've found a bug or have a feature request, please email us with:
+              Help us improve! If you've found a bug, please visit our <a href="/report-bug" className="text-blue-600 hover:text-blue-800 font-semibold">Bug Report page</a> for detailed instructions.
             </p>
-            <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
-              <li>Detailed description of the issue or feature</li>
-              <li>Steps to reproduce (for bugs)</li>
-              <li>Browser and operating system information</li>
-              <li>Screenshots if applicable</li>
-            </ul>
+            <p className="text-gray-700">
+              Have a feature request? Email us at <a href="mailto:melodywebpages@gmail.com" className="text-blue-600 hover:text-blue-800 font-semibold">melodywebpages@gmail.com</a> with your suggestion!
+            </p>
           </section>
         </div>
 
