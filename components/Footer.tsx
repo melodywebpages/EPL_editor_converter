@@ -98,7 +98,9 @@ export default function Footer() {
               style={{
                 color: '#f97316',
                 fontWeight: 900,
-                lineHeight: 1
+                lineHeight: 1,
+                marginBottom: '-8px',
+                alignSelf: 'flex-end'
               }}
               aria-label="G Clef"
             >
