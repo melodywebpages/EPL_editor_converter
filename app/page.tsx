@@ -136,7 +136,8 @@ export default function Home() {
       a.href = url;
       
       const extension = outputFormat;
-      a.download = file.name.replace(/\.[^/.]+$/, `.${extension}`);
+      const fileName = file?.name || 'label.epl';
+      a.download = fileName.replace(/\.[^/.]+$/, `.${extension}`);
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
