@@ -77,17 +77,31 @@ export default function Footer() {
           </div>
           
           {/* Created by section */}
-          <div className="flex items-center justify-center gap-2 mt-6">
+          <div className="flex items-center justify-center gap-3 mt-6">
             <p className="text-sm text-gray-400">
               Created with love by <span className="text-white font-semibold">MelodyWebPages</span>
             </p>
             <svg 
-              className="w-5 h-5 text-purple-400" 
+              className="w-7 h-7" 
               viewBox="0 0 24 24" 
-              fill="currentColor"
-              aria-label="Solana"
+              fill="#f97316"
+              aria-label="Music Note"
+              style={{
+                animation: 'rotate3d 4s linear infinite',
+                transformStyle: 'preserve-3d',
+                filter: 'drop-shadow(0 2px 4px rgba(249, 115, 22, 0.4))'
+              }}
             >
-              <path d="M5.93 17.57a.75.75 0 0 1 .53-.22h15.08a.38.38 0 0 1 .26.65l-3.54 3.54a.75.75 0 0 1-.53.22H2.65a.38.38 0 0 1-.26-.65l3.54-3.54Zm0-15.34L9.47.69a.75.75 0 0 1 .53-.22h15.08a.38.38 0 0 1 .26.65l-3.54 3.54a.75.75 0 0 1-.53.22H2.65a.38.38 0 0 1-.26-.65l3.54-3.54ZM18.07 12l3.54-3.54a.38.38 0 0 0-.26-.65H6.27a.75.75 0 0 0-.53.22L2.2 11.57a.38.38 0 0 0 .26.65h15.08a.75.75 0 0 0 .53-.22Z"/>
+              <defs>
+                <style>{`
+                  @keyframes rotate3d {
+                    0% { transform: perspective(400px) rotateY(0deg); }
+                    100% { transform: perspective(400px) rotateY(360deg); }
+                  }
+                `}</style>
+              </defs>
+              <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+              <ellipse cx="10" cy="17" rx="2.5" ry="1.5" opacity="0.5"/>
             </svg>
           </div>
           
