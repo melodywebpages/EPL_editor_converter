@@ -1,6 +1,16 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import ToastContainer, { ToastMessage } from '@/components/ToastContainer';
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+interface DownloadHistoryItem {
+  id: string;
+  filename: string;
+  format: string;
+  timestamp: number;
+}
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
@@ -18,15 +28,79 @@ export default function Home() {
   const [labelCount, setLabelCount] = useState(1);
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [isEdited, setIsEdited] = useState(false);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [zoom, setZoom] = useState(100);
+  const [fullScreen, setFullScreen] = useState(false);
+  const [downloadHistory, setDownloadHistory] = useState<DownloadHistoryItem[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Toast notification helper
+  const showToast = (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
+    const id = Date.now().toString();
+    setToasts(prev => [...prev, { id, message, type }]);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
+
+  // Load download history from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('downloadHistory');
+    if (stored) {
+      try {
+        setDownloadHistory(JSON.parse(stored));
+      } catch (e) {
+        console.error('Failed to parse download history:', e);
+      }
+    }
+  }, []);
+
+  // Save download to history
+  const addToHistory = (filename: string, format: string) => {
+    const newItem: DownloadHistoryItem = {
+      id: Date.now().toString(),
+      filename,
+      format,
+      timestamp: Date.now(),
+    };
+    const updated = [newItem, ...downloadHistory].slice(0, 10); // Keep last 10
+    setDownloadHistory(updated);
+    localStorage.setItem('downloadHistory', JSON.stringify(updated));
+  };
+
+  // Clear download history
+  const clearHistory = () => {
+    setDownloadHistory([]);
+    localStorage.removeItem('downloadHistory');
+    showToast('Download history cleared', 'success');
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
+      // Validate file size
+      if (selectedFile.size > MAX_FILE_SIZE) {
+        setError(`File too large! Maximum size is ${MAX_FILE_SIZE / (1024 * 1024)}MB`);
+        showToast(`File exceeds ${MAX_FILE_SIZE / (1024 * 1024)}MB limit`, 'error');
+        return;
+      }
+
+      // Validate file extension
+      const validExtensions = ['.epl', '.txt'];
+      const fileExtension = selectedFile.name.toLowerCase().substring(selectedFile.name.lastIndexOf('.'));
+      if (!validExtensions.includes(fileExtension)) {
+        setError('Invalid file type! Please upload an .epl or .txt file');
+        showToast('Invalid file type. Please upload .epl or .txt files', 'error');
+        return;
+      }
+
       setFile(selectedFile);
       setError(null);
       setWarnings([]);
+      showToast('File uploaded successfully', 'success');
       
       // Read and display EPL content
       const content = await selectedFile.text();
@@ -38,6 +112,8 @@ export default function Home() {
       const pCommands = content.match(/^P\d*/gim);
       const detectedLabelCount = pCommands ? pCommands.length : 1;
       setLabelCount(detectedLabelCount);
+      
+      showToast(`Detected ${detectedLabelCount} label${detectedLabelCount > 1 ? 's' : ''}`, 'info');
       
       // Generate preview
       await generatePreview(selectedFile);
@@ -55,9 +131,26 @@ export default function Home() {
     
     const droppedFile = e.dataTransfer.files?.[0];
     if (droppedFile) {
+      // Validate file size
+      if (droppedFile.size > MAX_FILE_SIZE) {
+        setError(`File too large! Maximum size is ${MAX_FILE_SIZE / (1024 * 1024)}MB`);
+        showToast(`File exceeds ${MAX_FILE_SIZE / (1024 * 1024)}MB limit`, 'error');
+        return;
+      }
+
+      // Validate file extension
+      const validExtensions = ['.epl', '.txt'];
+      const fileExtension = droppedFile.name.toLowerCase().substring(droppedFile.name.lastIndexOf('.'));
+      if (!validExtensions.includes(fileExtension)) {
+        setError('Invalid file type! Please upload an .epl or .txt file');
+        showToast('Invalid file type. Please upload .epl or .txt files', 'error');
+        return;
+      }
+
       setFile(droppedFile);
       setError(null);
       setWarnings([]);
+      showToast('File uploaded successfully', 'success');
       
       // Read and display EPL content
       const content = await droppedFile.text();
@@ -69,6 +162,8 @@ export default function Home() {
       const pCommands = content.match(/^P\d*/gim);
       const detectedLabelCount = pCommands ? pCommands.length : 1;
       setLabelCount(detectedLabelCount);
+      
+      showToast(`Detected ${detectedLabelCount} label${detectedLabelCount > 1 ? 's' : ''}`, 'info');
       
       // Generate preview
       await generatePreview(droppedFile);
@@ -152,14 +247,21 @@ export default function Home() {
       
       const extension = outputFormat;
       const fileName = file?.name || 'label.epl';
-      a.download = fileName.replace(/\.[^/.]+$/, `.${extension}`);
+      const downloadFileName = fileName.replace(/\.[^/.]+$/, `.${extension}`);
+      a.download = downloadFileName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
 
+      // Add to download history
+      addToHistory(downloadFileName, extension.toUpperCase());
+      showToast(`Successfully converted to ${extension.toUpperCase()}!`, 'success');
+
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred during conversion');
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred during conversion';
+      setError(errorMessage);
+      showToast(errorMessage.split('\n')[0], 'error');
     } finally {
       setLoading(false);
     }
@@ -744,11 +846,37 @@ export default function Home() {
                     {previewImage && (
                       <>
                         <button
+                          onClick={() => setZoom(Math.max(25, zoom - 25))}
+                          className="text-xs bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700 transition-colors"
+                          title="Zoom Out"
+                          disabled={zoom <= 25}
+                        >
+                          ➖
+                        </button>
+                        <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                          {zoom}%
+                        </span>
+                        <button
+                          onClick={() => setZoom(Math.min(200, zoom + 25))}
+                          className="text-xs bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700 transition-colors"
+                          title="Zoom In"
+                          disabled={zoom >= 200}
+                        >
+                          ➕
+                        </button>
+                        <button
                           onClick={() => setRotation((rotation + 90) % 360)}
                           className="text-xs bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700 transition-colors"
                           title="Rotate preview 90°"
                         >
-                          🔄 Rotate
+                          🔄
+                        </button>
+                        <button
+                          onClick={() => setFullScreen(true)}
+                          className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors"
+                          title="Fullscreen Preview"
+                        >
+                          ⛶
                         </button>
                         <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
                           ✓ Rendered
@@ -760,35 +888,41 @@ export default function Home() {
                 <div className="bg-gray-100 rounded-lg p-4 border-2 border-dashed border-gray-300 min-h-[500px] flex items-center justify-center">
                   {loadingPreview ? (
                     <div className="text-center">
-                      <svg
-                        className="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      <p className="text-gray-600">Generating preview...</p>
+                      <div className="relative inline-flex">
+                        <svg
+                          className="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                      </div>
+                      <p className="text-gray-600 font-medium">Generating preview...</p>
+                      <p className="text-gray-500 text-xs mt-1">This may take a few seconds</p>
                     </div>
                   ) : previewImage ? (
                     <div className="w-full overflow-auto max-h-[450px]">
                       <img
                         src={previewImage}
                         alt="Label Preview"
-                        className="max-w-full h-auto mx-auto border-2 border-gray-400 shadow-lg rounded bg-white transition-transform duration-300"
-                        style={{ transform: `rotate(${rotation}deg)` }}
+                        className="max-w-full h-auto mx-auto border-2 border-gray-400 shadow-lg rounded bg-white transition-all duration-300"
+                        style={{ 
+                          transform: `rotate(${rotation}deg) scale(${zoom / 100})`,
+                          transformOrigin: 'center'
+                        }}
                       />
                     </div>
                   ) : (
@@ -847,15 +981,73 @@ export default function Home() {
           </button>
         </div>
 
+        {/* Download History */}
+        {downloadHistory.length > 0 && (
+          <div className="mt-8">
+            <div className="flex items-center justify-between mb-4">
+              <button
+                onClick={() => setShowHistory(!showHistory)}
+                className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} hover:text-blue-600 flex items-center gap-2`}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Download History ({downloadHistory.length})
+                <svg className={`w-4 h-4 transition-transform ${showHistory ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {showHistory && (
+                <button
+                  onClick={clearHistory}
+                  className="text-xs text-red-600 hover:text-red-800 underline"
+                >
+                  Clear History
+                </button>
+              )}
+            </div>
+            {showHistory && (
+              <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} rounded-xl border p-4`}>
+                <div className="space-y-2">
+                  {downloadHistory.map((item) => (
+                    <div key={item.id} className={`flex items-center justify-between p-3 ${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg`}>
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 ${darkMode ? 'bg-gray-600' : 'bg-blue-100'} rounded`}>
+                          <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-900'}`}>{item.filename}</p>
+                          <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                            {item.format} • {new Date(item.timestamp).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                      <span className={`text-xs ${darkMode ? 'bg-gray-600 text-gray-300' : 'bg-green-100 text-green-800'} px-2 py-1 rounded`}>
+                        Downloaded
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Info Section */}
-        <div className="mt-8 bg-blue-50 rounded-xl p-6 border border-blue-100">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">
+        <div className="mt-8 bg-blue-50 dark:bg-gray-800 rounded-xl p-6 border border-blue-100 dark:border-gray-700">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
             ℹ️ About this EPL Editor & Converter
           </h2>
-          <div className="text-sm text-gray-700 space-y-2">
+          <div className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
+            <p>
+              <strong>File Size Limit:</strong> Maximum file size is {MAX_FILE_SIZE / (1024 * 1024)}MB. 
+              Supported formats: .epl, .txt
+            </p>
             <p>
               <strong>Edit EPL Code:</strong> Our live editor lets you modify EPL (Eltron Programming Language) 
-              code with real-time preview. Changes update automatically as you type.
+              code with real-time preview. Changes update automatically after 1 second.
             </p>
             <p>
               <strong>Convert to Multiple Formats:</strong> Export your edited labels to ZPL 
@@ -866,12 +1058,62 @@ export default function Home() {
               Lines (LO, LS), Label dimensions (Q, q), Print quantity (P), and more.
             </p>
             <p>
-              <strong>Note:</strong> Complex or proprietary EPL commands may not 
-              be fully supported. Check the warnings after conversion.
+              <strong>Privacy:</strong> All processing happens client-side or through temporary conversion. 
+              We do not store your files or data.
             </p>
           </div>
         </div>
       </div>
+
+      {/* Fullscreen Preview Modal */}
+      {fullScreen && previewImage && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-95 flex items-center justify-center p-4" onClick={() => setFullScreen(false)}>
+          <button
+            onClick={() => setFullScreen(false)}
+            className="absolute top-4 right-4 text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Close
+          </button>
+          <div className="flex items-center gap-4 absolute top-4 left-4">
+            <button
+              onClick={(e) => { e.stopPropagation(); setZoom(Math.max(25, zoom - 25)); }}
+              className="text-white bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg"
+            >
+              ➖
+            </button>
+            <span className="text-white font-medium">{zoom}%</span>
+            <button
+              onClick={(e) => { e.stopPropagation(); setZoom(Math.min(200, zoom + 25)); }}
+              className="text-white bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg"
+            >
+              ➕
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); setRotation((rotation + 90) % 360); }}
+              className="text-white bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded-lg"
+            >
+              🔄 Rotate
+            </button>
+          </div>
+          <div className="max-w-full max-h-full overflow-auto" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={previewImage}
+              alt="Label Preview Fullscreen"
+              className="max-w-full h-auto"
+              style={{ 
+                transform: `rotate(${rotation}deg) scale(${zoom / 100})`,
+                transformOrigin: 'center'
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
     </main>
   );
 }
