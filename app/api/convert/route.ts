@@ -33,8 +33,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Get label dimensions from EPL or use specified size
-    let dimensions = getLabelDimensions(eplContent);
-    let { width, height, dpmm } = dimensions;
+    const dimensions = getLabelDimensions(eplContent);
+    let width: string;
+    let height: string;
+    const dpmm = dimensions.dpmm;
 
     // Override dimensions if a specific label size is selected
     if (labelSize !== 'auto') {
@@ -51,7 +53,13 @@ export async function POST(request: NextRequest) {
           width = '2.25';
           height = '4';
           break;
+        default:
+          width = dimensions.width.toString();
+          height = dimensions.height.toString();
       }
+    } else {
+      width = dimensions.width.toString();
+      height = dimensions.height.toString();
     }
 
     // Call Labelary API to convert ZPL to PDF
