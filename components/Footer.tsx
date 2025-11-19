@@ -78,7 +78,7 @@ export default function Footer() {
           
           {/* Created by section */}
           <div className="flex items-end justify-center gap-1.5 mt-6">
-            <p className="text-sm text-gray-400" style={{ paddingBottom: '8px' }}>
+            <p className="text-sm text-gray-400" style={{ paddingBottom: '0.3px' }}>
               Created with love by <span className="text-white font-semibold">MelodyWebPages</span>
             </p>
             <style>{`
