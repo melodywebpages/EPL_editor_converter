@@ -6,6 +6,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const outputFormat = formData.get('format') as string || 'pdf';
+    const labelSize = formData.get('labelSize') as string || 'auto';
 
     if (!file) {
       return NextResponse.json(
@@ -31,9 +32,27 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Get label dimensions from EPL
-    const dimensions = getLabelDimensions(eplContent);
-    const { width, height, dpmm } = dimensions;
+    // Get label dimensions from EPL or use specified size
+    let dimensions = getLabelDimensions(eplContent);
+    let { width, height, dpmm } = dimensions;
+
+    // Override dimensions if a specific label size is selected
+    if (labelSize !== 'auto') {
+      switch (labelSize) {
+        case '4x6':
+          width = '4';
+          height = '6';
+          break;
+        case '4x4':
+          width = '4';
+          height = '4';
+          break;
+        case '2.25x4':
+          width = '2.25';
+          height = '4';
+          break;
+      }
+    }
 
     // Call Labelary API to convert ZPL to PDF
     const labelaryUrl = `http://api.labelary.com/v1/printers/${dpmm}dpmm/labels/${width}x${height}/0/`;

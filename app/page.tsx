@@ -8,10 +8,14 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [outputFormat, setOutputFormat] = useState<'pdf' | 'zpl' | 'png'>('pdf');
+  const [labelSize, setLabelSize] = useState<'auto' | '4x6' | '4x4' | '2.25x4'>('auto');
+  const [darkMode, setDarkMode] = useState(false);
+  const [rotation, setRotation] = useState(0);
   const [generatedZpl, setGeneratedZpl] = useState<string | null>(null);
   const [eplContent, setEplContent] = useState<string | null>(null);
   const [editedContent, setEditedContent] = useState<string | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [labelCount, setLabelCount] = useState(1);
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [isEdited, setIsEdited] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -29,6 +33,11 @@ export default function Home() {
       setEplContent(content);
       setEditedContent(content);
       setIsEdited(false);
+      
+      // Detect number of labels (count P commands)
+      const pCommands = content.match(/^P\d*/gim);
+      const detectedLabelCount = pCommands ? pCommands.length : 1;
+      setLabelCount(detectedLabelCount);
       
       // Generate preview
       await generatePreview(selectedFile);
@@ -55,6 +64,11 @@ export default function Home() {
       setEplContent(content);
       setEditedContent(content);
       setIsEdited(false);
+      
+      // Detect number of labels (count P commands)
+      const pCommands = content.match(/^P\d*/gim);
+      const detectedLabelCount = pCommands ? pCommands.length : 1;
+      setLabelCount(detectedLabelCount);
       
       // Generate preview
       await generatePreview(droppedFile);
@@ -84,6 +98,7 @@ export default function Home() {
       }
       
       formData.append('format', outputFormat);
+      formData.append('labelSize', labelSize); // Include label size
 
       const response = await fetch('/api/convert', {
         method: 'POST',
@@ -158,6 +173,7 @@ export default function Home() {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('format', 'png'); // Always use PNG for preview
+      formData.append('labelSize', labelSize); // Include label size
 
       const response = await fetch('/api/convert', {
         method: 'POST',
@@ -200,6 +216,7 @@ export default function Home() {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('format', 'png');
+      formData.append('labelSize', labelSize); // Include label size
 
       const response = await fetch('/api/convert', {
         method: 'POST',
@@ -285,6 +302,34 @@ export default function Home() {
     }
   };
 
+  // Load dark mode preference from localStorage
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+    setDarkMode(savedDarkMode);
+    if (savedDarkMode) {
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
+
+  // Apply dark mode when it changes
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('darkMode', 'true');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('darkMode', 'false');
+    }
+  }, [darkMode]);
+
+  // Regenerate preview when label size changes
+  useEffect(() => {
+    if (file && editedContent) {
+      generatePreviewFromText(editedContent);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [labelSize]);
+
   // Cleanup preview image on unmount
   useEffect(() => {
     return () => {
@@ -298,14 +343,31 @@ export default function Home() {
   }, [previewImage]);
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12 px-4">
+    <main className={`min-h-screen ${darkMode ? 'dark bg-gray-900' : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'} py-12 px-4 transition-colors duration-300`}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-12 relative">
+          {/* Dark Mode Toggle */}
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="absolute top-0 right-0 p-3 rounded-lg bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition-all duration-200"
+            title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {darkMode ? (
+              <svg className="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            )}
+          </button>
+
+          <h1 className={`text-5xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-4`}>
             EPL Editor & Converter
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className={`text-lg ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
             Edit, preview, and convert EPL (Eltron Programming Language) to ZPL, PDF, or PNG
           </p>
           <div className="mt-3 flex items-center justify-center gap-4 text-sm text-gray-500">
@@ -333,7 +395,7 @@ export default function Home() {
         {/* Main Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column - Upload & Controls */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+          <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} rounded-2xl shadow-xl p-8 border transition-colors duration-300`}>
           {/* File Upload Area */}
           <div
             onDragOver={handleDragOver}
@@ -393,7 +455,7 @@ export default function Home() {
 
           {/* Output Format Selection */}
           <div className="mt-8">
-            <label className="block text-sm font-semibold text-gray-700 mb-3">
+            <label className={`block text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-3`}>
               Output Format:
             </label>
             <div className="flex gap-4">
@@ -426,6 +488,55 @@ export default function Home() {
                 }`}
               >
                 🖼️ PNG
+              </button>
+            </div>
+          </div>
+
+          {/* Label Size Selection */}
+          <div className="mt-6">
+            <label className={`block text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-3`}>
+              Label Size:
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setLabelSize('auto')}
+                className={`py-2.5 px-4 rounded-lg font-medium text-sm transition-all ${
+                  labelSize === 'auto'
+                    ? 'bg-green-600 text-white shadow-lg'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                📐 Auto Detect
+              </button>
+              <button
+                onClick={() => setLabelSize('4x6')}
+                className={`py-2.5 px-4 rounded-lg font-medium text-sm transition-all ${
+                  labelSize === '4x6'
+                    ? 'bg-green-600 text-white shadow-lg'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                📦 4×6 Shipping
+              </button>
+              <button
+                onClick={() => setLabelSize('4x4')}
+                className={`py-2.5 px-4 rounded-lg font-medium text-sm transition-all ${
+                  labelSize === '4x4'
+                    ? 'bg-green-600 text-white shadow-lg'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                ⬜ 4×4 Square
+              </button>
+              <button
+                onClick={() => setLabelSize('2.25x4')}
+                className={`py-2.5 px-4 rounded-lg font-medium text-sm transition-all ${
+                  labelSize === '2.25x4'
+                    ? 'bg-green-600 text-white shadow-lg'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                📮 2.25×4 USPS
               </button>
             </div>
           </div>
@@ -567,10 +678,10 @@ export default function Home() {
           {file && (
             <div className="space-y-6">
               {/* EPL Content Editor */}
-              <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+              <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} rounded-2xl shadow-xl p-6 border transition-colors duration-300`}>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <h3 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-900'} flex items-center`}>
                       <span className="mr-2">📝</span> EPL Content
                     </h3>
                     {isEdited && (
@@ -597,12 +708,12 @@ export default function Home() {
                 <textarea
                   value={editedContent || ''}
                   onChange={(e) => handleContentChange(e.target.value)}
-                  className="w-full bg-gray-50 rounded-lg p-4 border border-gray-200 font-mono text-xs text-gray-700 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full ${darkMode ? 'bg-gray-900 border-gray-600 text-gray-200' : 'bg-gray-50 border-gray-200 text-gray-700'} rounded-lg p-4 border font-mono text-xs resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-300`}
                   rows={15}
                   placeholder="EPL content will appear here..."
                   spellCheck={false}
                 />
-                <div className="mt-3 text-xs text-gray-500 flex justify-between">
+                <div className={`mt-3 text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} flex justify-between`}>
                   <span>Lines: {editedContent?.split('\n').length || 0}</span>
                   <span className="flex items-center gap-2">
                     {loadingPreview && (
@@ -611,22 +722,40 @@ export default function Home() {
                     <span>Size: {(new Blob([editedContent || '']).size / 1024).toFixed(2)} KB</span>
                   </span>
                 </div>
-                <p className="mt-2 text-xs text-gray-500">
+                <p className={`mt-2 text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                   💡 Edit the EPL code above - preview updates automatically after 1 second
                 </p>
               </div>
 
               {/* Label Preview */}
-              <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+              <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} rounded-2xl shadow-xl p-6 border transition-colors duration-300`}>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                    <span className="mr-2">👁️</span> Label Preview
-                  </h3>
-                  {previewImage && (
-                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                      ✓ Rendered
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <h3 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-900'} flex items-center`}>
+                      <span className="mr-2">👁️</span> Label Preview
+                    </h3>
+                    {labelCount > 1 && (
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                        📄 {labelCount} labels detected
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {previewImage && (
+                      <>
+                        <button
+                          onClick={() => setRotation((rotation + 90) % 360)}
+                          className="text-xs bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700 transition-colors"
+                          title="Rotate preview 90°"
+                        >
+                          🔄 Rotate
+                        </button>
+                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                          ✓ Rendered
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
                 <div className="bg-gray-100 rounded-lg p-4 border-2 border-dashed border-gray-300 min-h-[500px] flex items-center justify-center">
                   {loadingPreview ? (
@@ -658,7 +787,8 @@ export default function Home() {
                       <img
                         src={previewImage}
                         alt="Label Preview"
-                        className="max-w-full h-auto mx-auto border-2 border-gray-400 shadow-lg rounded bg-white"
+                        className="max-w-full h-auto mx-auto border-2 border-gray-400 shadow-lg rounded bg-white transition-transform duration-300"
+                        style={{ transform: `rotate(${rotation}deg)` }}
                       />
                     </div>
                   ) : (
@@ -682,9 +812,11 @@ export default function Home() {
                 </div>
                 
                 {previewImage && (
-                  <div className="mt-4 text-center">
-                    <p className="text-xs text-gray-500">
-                      Preview of the first label • Full quality available on download
+                  <div className={`mt-4 text-center ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    <p className="text-xs">
+                      {labelCount > 1 
+                        ? `Preview of label 1 of ${labelCount} • All labels included in download`
+                        : 'Preview of label • Full quality available on download'}
                     </p>
                   </div>
                 )}

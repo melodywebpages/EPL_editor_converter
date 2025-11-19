@@ -225,6 +225,55 @@ export function convertEplToZpl(eplContent: string): ConversionResult {
   };
 }
 
+// Split EPL content into multiple labels (split by P command)
+export function splitEplLabels(eplContent: string): string[] {
+  const lines = eplContent.split('\n').map(line => line.trim());
+  const labels: string[] = [];
+  let currentLabel: string[] = [];
+  let headerLines: string[] = []; // Store setup commands before first P
+  let foundFirstP = false;
+
+  for (const line of lines) {
+    if (!line || line.startsWith('#')) continue;
+
+    // P command marks the end of a label (print command)
+    if (line.match(/^P\d*/i)) {
+      if (!foundFirstP) {
+        // This is the first P command
+        foundFirstP = true;
+        currentLabel.push(line);
+        labels.push([...headerLines, ...currentLabel].join('\n'));
+        currentLabel = [];
+      } else {
+        // Subsequent P commands - new label with header
+        currentLabel.push(line);
+        labels.push([...headerLines, ...currentLabel].join('\n'));
+        currentLabel = [];
+      }
+    } else {
+      if (!foundFirstP) {
+        // Before first P, these are header/setup commands
+        headerLines.push(line);
+      } else {
+        // After first P, add to current label
+        currentLabel.push(line);
+      }
+    }
+  }
+
+  // If there's remaining content without a final P command, add it
+  if (currentLabel.length > 0) {
+    labels.push([...headerLines, ...currentLabel].join('\n'));
+  }
+
+  // If no P commands were found, return the entire content as one label
+  if (labels.length === 0 && (headerLines.length > 0 || currentLabel.length > 0)) {
+    labels.push([...headerLines, ...currentLabel].join('\n'));
+  }
+
+  return labels.filter(label => label.trim().length > 0);
+}
+
 export function getLabelDimensions(eplContent: string): { width: number, height: number, dpmm: number } {
   // Default label size (4x6 inches at 8dpmm)
   let width = 4;
