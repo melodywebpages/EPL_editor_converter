@@ -7,10 +7,10 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* About */}
           <div>
-            <h3 className="text-white font-semibold text-lg mb-4">EPL Editor & Converter</h3>
+            <h3 className="text-white font-semibold text-lg mb-4">[Your App Name]</h3>
             <p className="text-sm text-gray-400 leading-relaxed">
-              Free online EPL editor with live preview. Edit EPL code and convert to ZPL, PDF, or PNG formats. 
-              Fast, secure, and easy to use.
+              [Brief description of what your app does - 2-3 sentences highlighting key features and benefits. 
+              Replace this with actual content that describes your application's purpose and value.]
             </p>
           </div>
 
@@ -61,7 +61,7 @@ export default function Footer() {
         <div className="mt-12 pt-8 border-t border-gray-800">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-gray-400">
-              © {currentYear} EPL Editor & Converter. All rights reserved.
+              © {currentYear} [Your App Name]. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm">
               <a href="/privacy-policy" className="hover:text-white transition-colors">
@@ -76,7 +76,7 @@ export default function Footer() {
             </div>
           </div>
           
-          {/* Created by section */}
+          {/* Created by section with rotating G clef - DO NOT MODIFY THIS SECTION */}
           <div className="flex items-end justify-center gap-1.5 mt-6">
             <p className="text-sm text-gray-400" style={{ paddingBottom: '0.1px' }}>
               Created with love by <span className="text-white font-semibold">MelodyWebPages</span>

@@ -1,0 +1,36 @@
+# Add these lines to your existing .gitignore file
+# These ensure sensitive files are never committed to version control
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Local development
+.DS_Store
+*.pem
+*.log
+
+# Production build
+/build
+/.next/
+/out/
+
+# Dependency directories
+node_modules/
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Misc
+.env*.local
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+

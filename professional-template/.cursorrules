@@ -1,0 +1,319 @@
+# Professional Next.js Site Template - Cursor AI Rules
+
+## Purpose
+This template adds professional components to any Next.js application, including:
+- Professional Footer with MelodyWebPages branding and rotating orange G clef icon
+- Google Analytics & Google Ads integration
+- Cookie consent banner
+- Legal pages (Privacy Policy, Terms of Service, Contact, Report Bug)
+- Google Cloud deployment configuration
+- Production-ready setup
+
+## Implementation Instructions for Cursor AI
+
+### STEP 1: Analyze Current Application
+Before implementing, analyze the existing app to understand:
+1. **App Name & Purpose**: Read package.json, main page content, and existing metadata
+2. **Tech Stack**: Confirm Next.js version, TypeScript/JavaScript, styling approach
+3. **File Structure**: Identify where components, pages, and config files are located
+4. **Existing Components**: Check if Footer, Analytics, or similar components already exist
+
+### STEP 2: Install Dependencies (if needed)
+Check package.json and ensure these dependencies exist:
+- axios (for API calls if needed)
+- react, react-dom, next
+- TypeScript types if using TypeScript
+
+### STEP 3: Create Components Directory
+If not exists, create `/components` directory at project root.
+
+### STEP 4: Add Professional Footer Component
+Create `/components/Footer.tsx` with MelodyWebPages branding:
+
+**Key Requirements:**
+- Must have 3-column grid (About, Legal, Support)
+- About section: Customize description based on app's actual functionality
+- Legal section: Links to /privacy-policy, /terms-of-service, /contact
+- Support section: Email support, Report bug link
+- Bottom section: Copyright with current year, "Created with love by MelodyWebPages"
+- CRITICAL: Include rotating orange G clef icon (𝄞) with 3D animation
+- Animation: 4-second 3D rotation with orange color (#f97316) and drop shadow
+- Style: Modern, dark background (bg-gray-900), clean typography
+
+**Animation Styles (MUST INCLUDE):**
+```css
+@keyframes rotate3d {
+  0% { transform: perspective(500px) rotateY(0deg); }
+  100% { transform: perspective(500px) rotateY(360deg); }
+}
+.gclef-3d {
+  animation: rotate3d 4s linear infinite;
+  transform-style: preserve-3d;
+  filter: drop-shadow(0 3px 6px rgba(249, 115, 22, 0.6));
+  display: inline-block;
+}
+```
+
+### STEP 5: Add Google Analytics Component
+Create `/components/GoogleAnalytics.tsx`:
+- Uses Next.js Script component
+- Reads NEXT_PUBLIC_GA_MEASUREMENT_ID from environment
+- Returns null if no ID configured
+- Includes gtag initialization with proper config
+
+### STEP 6: Add Google AdSense Component
+Create `/components/GoogleAdsense.tsx`:
+- Uses Next.js Script component
+- Reads NEXT_PUBLIC_ADSENSE_CLIENT_ID from environment
+- Returns null if no ID configured
+- Uses useEffect to push ads after mount
+
+### STEP 7: Add Cookie Consent Component
+Create `/components/CookieConsent.tsx`:
+- Shows banner after 1 second delay
+- Stores consent in localStorage
+- Accept/Decline buttons
+- Link to privacy policy
+- Dark bottom banner with blue accent
+- Only shows if user hasn't consented
+
+### STEP 8: Update Root Layout
+Modify `app/layout.tsx`:
+1. Import all new components: Footer, CookieConsent, GoogleAnalytics, GoogleAdsense
+2. Add GoogleAnalytics and GoogleAdsense in <head>
+3. Add {children} and Footer in <body>
+4. Add CookieConsent after Footer
+5. Update metadata object with app-specific details:
+   - title: Based on app functionality
+   - description: Comprehensive, SEO-friendly (150-160 chars)
+   - keywords: Relevant to app functionality
+   - authors, creator, publisher
+   - openGraph and twitter metadata
+   - robots: 'index, follow'
+
+### STEP 9: Create Legal Pages
+Create these pages in `app/` directory:
+
+**app/privacy-policy/page.tsx**
+- Comprehensive privacy policy
+- Sections: Information Collection, Usage, Cookies, Analytics, Google Ads, User Rights, Security, Changes
+- Customize based on what data the app actually collects
+- Use modern card design with gradient background
+- Include "Back to [App Name]" link
+
+**app/terms-of-service/page.tsx**
+- Comprehensive terms of service
+- Sections: Acceptance, Service Description, Use License, User Content, IP, Third-Party Services, Disclaimers, Liability, Indemnification, Privacy, Modifications, Governing Law, Contact
+- Customize service description based on actual app functionality
+- Match styling with privacy policy
+
+**app/contact/page.tsx**
+- Contact information
+- FAQ section (customize based on app)
+- Email: melodywebpages@gmail.com
+- Response time info
+- Contact form (optional)
+
+**app/report-bug/page.tsx**
+- Bug report form or instructions
+- Email for bug reports
+- Template for what info to include
+- Acknowledge response timeframe
+
+### STEP 10: Create Environment Variables Template
+Create `.env.example`:
+```
+# Google Analytics
+NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
+
+# Google AdSense
+NEXT_PUBLIC_ADSENSE_CLIENT_ID=ca-pub-XXXXXXXXXXXXXXXX
+```
+
+Add to `.env.local` for development (DO NOT commit).
+
+### STEP 11: Create/Update Deployment Files
+
+**Dockerfile**
+- Multi-stage build (base, deps, builder, runner)
+- Node 18 alpine
+- Production optimized
+- Port 8080 for Cloud Run
+- Non-root user for security
+
+**cloudbuild.yaml**
+- Google Cloud Build configuration
+- Docker build and push to GCR
+- Deploy to Cloud Run
+- Region: us-central1
+- Memory: 512Mi, CPU: 1
+- Max instances: 10
+- Allow unauthenticated (for public sites)
+
+**next.config.js**
+- Add standalone output for Docker: `output: 'standalone'`
+
+### STEP 12: Create Supporting Files
+
+**public/robots.txt**
+```
+User-agent: *
+Allow: /
+Sitemap: https://[your-domain.com]/sitemap.xml
+```
+
+**public/ads.txt** (if using Google AdSense)
+```
+google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
+```
+
+**app/sitemap.ts** (if not exists)
+- Generate sitemap with all routes
+- Include homepage, legal pages, main features
+
+### STEP 13: Update Package.json Scripts
+Add/ensure these scripts exist:
+```json
+{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start -p 8080",
+    "lint": "next lint",
+    "docker:build": "docker build -t [app-name] .",
+    "docker:run": "docker run -p 8080:8080 [app-name]"
+  }
+}
+```
+
+## Customization Rules
+
+### Text Adaptation
+When implementing, Cursor AI MUST:
+1. **Read the app carefully** to understand its purpose
+2. **Replace ALL placeholder text** with app-specific content:
+   - "[App Name]" → Actual app name from package.json or main page
+   - Service descriptions → Based on what app actually does
+   - Feature lists → Actual features the app provides
+   - FAQ items → Relevant to the specific app
+
+### Brand Consistency
+- App name/branding: Use throughout all pages
+- Footer "About" section: Describe the actual app, not generic text
+- Legal pages: Reference actual app name and functionality
+- Metadata: Accurate titles, descriptions, keywords for SEO
+
+### Styling Consistency
+- Use Tailwind CSS (ensure it's configured)
+- Color scheme: 
+  - Primary: Blue (#3B82F6, #2563EB)
+  - Accent: Orange (#F97316) for G clef only
+  - Background: Gray-50/Gray-900 for light/dark
+  - Cards: White with subtle shadows
+- Typography: System fonts, clear hierarchy
+- Gradients: from-blue-50 via-white to-purple-50 for page backgrounds
+
+### Professional Standards
+- All text must be grammatically correct
+- No lorem ipsum or placeholder content
+- Proper error handling in components
+- Loading states where applicable
+- Responsive design (mobile-first)
+- Accessibility considerations (aria-labels, semantic HTML)
+
+## Quality Checklist
+
+Before completing implementation, verify:
+- [ ] Footer appears on all pages with MelodyWebPages branding
+- [ ] Orange rotating G clef icon animates smoothly
+- [ ] All legal pages created with app-specific content
+- [ ] Google Analytics component added to layout
+- [ ] Google AdSense component added to layout
+- [ ] Cookie consent banner appears and stores preference
+- [ ] Environment variables documented in .env.example
+- [ ] Dockerfile and cloudbuild.yaml created
+- [ ] All links work (no 404s)
+- [ ] Responsive on mobile, tablet, desktop
+- [ ] No console errors or warnings
+- [ ] Build succeeds (`npm run build`)
+- [ ] App-specific text used throughout (no generic placeholders)
+
+## Common Mistakes to Avoid
+
+1. **Don't use generic text**: Always customize based on actual app
+2. **Don't skip the G clef animation**: It's a signature branding element
+3. **Don't forget environment variables**: Document them clearly
+4. **Don't copy-paste email addresses incorrectly**: Use melodywebpages@gmail.com
+5. **Don't miss the color scheme**: Orange (#F97316) only for G clef, blue for primary actions
+6. **Don't forget dark mode support**: Many components support it
+7. **Don't hardcode dates**: Use `new Date().getFullYear()` for copyright
+8. **Don't skip the "Back to..." links**: All legal pages need navigation back
+
+## File Structure After Implementation
+
+```
+project/
+├── app/
+│   ├── layout.tsx (updated)
+│   ├── page.tsx (existing)
+│   ├── globals.css (existing)
+│   ├── privacy-policy/
+│   │   └── page.tsx (new)
+│   ├── terms-of-service/
+│   │   └── page.tsx (new)
+│   ├── contact/
+│   │   └── page.tsx (new)
+│   ├── report-bug/
+│   │   └── page.tsx (new)
+│   └── sitemap.ts (new or updated)
+├── components/
+│   ├── Footer.tsx (new)
+│   ├── GoogleAnalytics.tsx (new)
+│   ├── GoogleAdsense.tsx (new)
+│   └── CookieConsent.tsx (new)
+├── public/
+│   ├── robots.txt (new)
+│   └── ads.txt (new, if using AdSense)
+├── Dockerfile (new)
+├── cloudbuild.yaml (new)
+├── .env.example (new)
+├── .env.local (create locally, don't commit)
+├── next.config.js (updated)
+└── package.json (updated)
+```
+
+## Testing Instructions
+
+After implementation:
+1. Run `npm run build` - should succeed
+2. Run `npm run dev` - check all pages render
+3. Test Footer on multiple pages
+4. Verify G clef animation works
+5. Test cookie consent accept/decline
+6. Check all legal page links
+7. Test on mobile viewport
+8. Check browser console for errors
+9. Verify environment variables work when set
+
+## Deployment Instructions
+
+1. Set up Google Cloud project
+2. Install gcloud CLI
+3. Authenticate: `gcloud auth login`
+4. Set project: `gcloud config set project [PROJECT_ID]`
+5. Enable APIs: Cloud Run, Cloud Build, Container Registry
+6. Set environment variables in Cloud Run
+7. Deploy: `gcloud run deploy [app-name] --source .`
+8. Set up GitHub repository with cloudbuild.yaml for CI/CD
+
+## Support
+
+For questions or issues with this template:
+- Email: melodywebpages@gmail.com
+- This template is maintained by MelodyWebPages
+- Based on production-ready Next.js applications
+
+---
+
+**Remember**: The goal is to make ANY Next.js app look professional and production-ready with consistent MelodyWebPages branding, modern UI, proper legal pages, analytics, and deployment configuration. Always customize content to match the specific app's functionality!
+
