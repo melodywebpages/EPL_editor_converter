@@ -4,7 +4,7 @@ Allow: /
 Disallow: /api/
 
 # Sitemap location
-Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://epltopdf.com/sitemap.xml
 
 # Common crawlers
 User-agent: Googlebot
