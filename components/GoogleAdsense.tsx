@@ -4,7 +4,8 @@ import Script from 'next/script';
 import { useEffect } from 'react';
 
 export default function GoogleAdsense() {
-  const adsenseClientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
+  // Use the client ID provided by Google AdSense
+  const adsenseClientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || 'ca-pub-9735530948817519';
 
   useEffect(() => {
     // Push ads after component mount
@@ -16,10 +17,6 @@ export default function GoogleAdsense() {
       }
     }
   }, [adsenseClientId]);
-
-  if (!adsenseClientId) {
-    return null;
-  }
 
   return (
     <Script
