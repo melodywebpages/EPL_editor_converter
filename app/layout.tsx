@@ -6,23 +6,23 @@ import GoogleAnalytics from '@/components/GoogleAnalytics'
 import GoogleAdsense from '@/components/GoogleAdsense'
 
 export const metadata: Metadata = {
-  title: 'EPL Editor & Converter - Edit, Preview & Convert EPL to ZPL/PDF',
-  description: 'Free online EPL editor and converter. Edit EPL code with live preview, convert EPL (Eltron Programming Language) files to ZPL, PDF, or PNG formats instantly. Real-time visualization, syntax editing, and multi-format export. No registration required.',
-  keywords: 'EPL editor, EPL converter, ZPL converter, EPL to PDF, EPL to ZPL, label editor, label converter, Eltron, Zebra, barcode label editor, shipping label editor, EPL code editor',
+  title: 'EPL to PDF Converter - Free Online EPL to PDF Converter Tool',
+  description: 'Convert EPL files to PDF instantly. Free online EPL to PDF converter - no registration required. Convert EPL (Eltron Programming Language) labels to PDF format quickly and easily.',
+  keywords: 'EPL to PDF, EPL to PDF converter, convert EPL to PDF, EPL converter, EPL to PDF online, free EPL to PDF, EPL label converter, Eltron to PDF, EPL file converter',
   authors: [{ name: 'EPL Editor Team' }],
   creator: 'EPL Editor & Converter',
   publisher: 'EPL Editor & Converter',
   robots: 'index, follow',
   openGraph: {
-    title: 'EPL Editor & Converter - Edit, Preview & Convert Labels',
-    description: 'Free online EPL editor with live preview. Edit EPL code and convert to ZPL, PDF, or PNG formats instantly. Real-time visualization.',
+    title: 'EPL to PDF Converter - Free Online EPL to PDF Converter',
+    description: 'Convert EPL files to PDF instantly. Free online EPL to PDF converter tool - no registration required.',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'EPL Editor & Converter',
-    description: 'Edit EPL code with live preview and convert to ZPL, PDF, or PNG formats instantly.',
+    title: 'EPL to PDF Converter - Free Online Tool',
+    description: 'Convert EPL files to PDF instantly. Free online EPL to PDF converter - no registration required.',
   },
   verification: {
     // Add your Google Site Verification code here
